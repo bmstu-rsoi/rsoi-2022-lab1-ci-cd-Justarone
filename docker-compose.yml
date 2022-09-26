@@ -14,5 +14,38 @@ services:
     ports:
       - "5432:5432"
 
+    person_service:
+        image: ghcr.io/userver-framework/docker-userver-build-base:v1a
+        privileged: true
+        environment:
+          - POSTGRES_DB=postgres
+          - POSTGRES_USER=postgres
+          - POSTGRES_PASSWORD=postgres
+          - PREFIX=${PREFIX:-~/.local}
+          - CC
+          - CCACHE_DIR=/person_service/.ccache
+          - CCACHE_HASHDIR
+          - CCACHE_NOHASHDIR
+          - CCACHE_PREFIX
+          - CCACHE_SIZE
+          - CMAKE_OPTS
+          - CORES_DIR=/cores
+          - CXX
+          - MAKE_OPTS
+        volumes:
+          - .:/person_service:rw
+          - ./third_party/userver/tools/docker:/tools:ro
+          - ${TC_CORES_DIR:-./.cores}:/cores:rw
+        ports:
+          - 8080:8080
+          - 5432:5432
+        working_dir: /person_service
+        entrypoint:
+          - /tools/run_as_user.sh
+        depends_on:
+          - postgres
+        networks:
+          - postgres
+
 volumes:
   db-data:
